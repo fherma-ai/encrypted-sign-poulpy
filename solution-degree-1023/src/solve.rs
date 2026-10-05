@@ -321,7 +321,7 @@ pub fn run(state: &mut State, env: &mut Env, cts: Vec<Ct>) -> Vec<Ct> {
     let mut basis = PowerBasis::new(Basis::Chebyshev, x);
     basis
         .populate(
-            DEGREE,
+            SERIES.len() - 1,
             state.poly.log_split(),
             state.poly.parity(),
             &env.module,
