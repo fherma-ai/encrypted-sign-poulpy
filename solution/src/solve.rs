@@ -1,11 +1,22 @@
 //! The sign of every element, over Poulpy's CKKS.
 //!
-//! One Chebyshev polynomial of degree 511, interpolating the ramp
-//! clamp(x / 0.02) — the specification promises every examined value stays
-//! 0.02 away from zero, so the ramp and the sign agree everywhere a verdict
-//! is read. The library's Baby-Step Giant-Step evaluator spends nine
-//! rescales of the budget; the power basis and the coefficients are public
-//! material, built once in init.
+//! One Chebyshev polynomial of degree 511, interpolating a ramp that
+//! saturates before the examination begins. The specification promises every
+//! examined value stays 0.02 away from zero, so a ramp whose corner sits
+//! inside that gap agrees with the sign everywhere a verdict is read.
+//!
+//! The corner is at 0.0125 rather than at 0.02, and the difference is the
+//! whole accuracy of this answer. A polynomial cannot turn a corner: it
+//! oscillates around it, and a ramp that reaches +-1 exactly at 0.02 leaves
+//! its worst oscillation exactly where the examination starts — 0.033 away
+//! from +-1, against a bar of 0.01. Moved to 0.0125 the oscillation sits
+//! where no value is ever drawn, and what the examination sees is the part
+//! that has settled: 0.0064. Sharper than that is worse again, because a
+//! steeper ramp needs a longer series than this one to follow.
+//!
+//! The library's Baby-Step Giant-Step evaluator spends nine rescales of the
+//! budget; the power basis and the coefficients are public material, built
+//! once in init.
 use poulpy_ckks::api::CKKSPolynomialEvaluationOps;
 use poulpy_ckks::layouts::CKKSPlaintextOwned;
 use poulpy_ckks::polynomial::{BSGSPolynomial, Basis, EncodeBSGS, Polynomial};
@@ -19,7 +30,11 @@ use crate::envelope::{Backend, Ct, Env, Pt, PtOut};
 use crate::fherma::{Inputs, Outputs, Point, Tensor};
 
 const DEGREE: usize = 511;
-const MARGIN: f64 = 0.02;
+/// Where the ramp reaches +-1. Inside the specification's margin of 0.02, so
+/// the series has settled by the time the examination's smallest value
+/// arrives; swept over [0.0105, 0.016], this is where the worst error on
+/// |x| >= 0.02 is least.
+const CORNER: f64 = 0.0125;
 
 pub struct State {
     poly: BSGSPolynomial<CKKSPlaintextOwned<Backend>>,
@@ -28,7 +43,7 @@ pub struct State {
 /// The polynomial is public material: interpolated, encoded for BSGS and
 /// uploaded once per point, never measured.
 pub fn init(_p: &Point, env: &mut Env) -> State {
-    let ramp = |x: f64| (x / MARGIN).clamp(-1.0, 1.0);
+    let ramp = |x: f64| (x / CORNER).clamp(-1.0, 1.0);
     let poly = Polynomial::chebyshev_interpolate(DEGREE, -1.0f64, 1.0, ramp)
         .expect("chebyshev interpolation");
     let meta = CoeffsMeta::from_delta_budget(env.params.prec_meta.log_delta, 8);
