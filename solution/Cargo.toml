@@ -10,18 +10,18 @@ name = "fherma-solution"
 path = "src/main.rs"
 
 [dependencies]
-poulpy-ckks = { version = "=0.8.2", features = ["test-utils"] }
-poulpy-core = "=0.8.2"
-poulpy-hal = "=0.8.2"
-poulpy-cpu-ref = "=0.8.2"
+poulpy-ckks = { version = "=0.8.3", features = ["test-utils"] }
+poulpy-core = "=0.8.3"
+poulpy-hal = "=0.8.3"
+poulpy-cpu-ref = "=0.8.3"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 
 [target.'cfg(target_arch = "x86_64")'.dependencies]
-poulpy-cpu-avx = { version = "=0.8.2", features = ["enable-avx", "enable-ckks"] }
+poulpy-cpu-avx = { version = "=0.8.3", features = ["enable-avx", "enable-ckks"] }
 
 [target.'cfg(target_arch = "aarch64")'.dependencies]
-poulpy-cpu-arm = { version = "=0.8.2", features = ["enable-neon", "enable-ckks"] }
+poulpy-cpu-arm = { version = "=0.8.3", features = ["enable-neon", "enable-ckks"] }
 
 [profile.release]
 opt-level = 3
