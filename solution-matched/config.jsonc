@@ -23,7 +23,7 @@
   // Bits of homomorphic budget above the scale. Each multiplication's
   // rescale spends log_delta of it; what remains at the end is headroom.
   // Torus width k = log_delta + log_budget, and k decides security.
-  "log_budget": 300,
+  "log_budget": 420,
 
   // Hamming weight of the ternary secret. The library's default regime.
   "secret_hamming_weight": 10923,
