@@ -1,0 +1,44 @@
+// The envelope builds everything from this file: module, keys, encryption.
+// It is read once per point, before anything is measured. `//` starts a
+// comment. Poulpy is not RNS: there is no prime chain and no level count —
+// precision is bits of a torus, and rescaling is a bit shift.
+{
+  // The only scheme this envelope speaks. Kept explicit so a reader of the
+  // repository does not have to know the library to know the mathematics.
+  "scheme": "ckks",
+
+  // Ring degree, a power of two. n/2 complex slots per ciphertext. The
+  // security floor below decides how much modulus a degree may carry.
+  "ring_degree": 16384,
+
+  // The limb size in bits: coefficients are stored base 2^base2k. The
+  // library's own tests run 19 for the f64 FFT backend; leave it unless you
+  // know why.
+  "base2k": 19,
+
+  // Bits of encoding scale: the precision every slot value carries. The
+  // CKKS delta, as a bit count.
+  "log_delta": 30,
+
+  // Bits of homomorphic budget above the scale. Each multiplication's
+  // rescale spends log_delta of it; what remains at the end is headroom.
+  // Torus width k = log_delta + log_budget, and k decides security.
+  "log_budget": 300,
+
+  // Hamming weight of the ternary secret. The library's default regime.
+  "secret_hamming_weight": 10923,
+
+  // Gadget decomposition length for evaluation keys. 1 unless you know why.
+  "dsize": 1,
+
+  // Slot rotations run() uses, by shift. An automorphism key is generated
+  // for exactly this list; rotating by an undeclared shift fails at run
+  // time. Negative rotates the other way. Example: [1, -1, 2]
+  "rotation_indexes": [],
+
+  // The security floor. The envelope refuses to build a module whose ring
+  // cannot carry the torus width at 128 bits classic, by the HE standard's
+  // table — the check runs before anything is measured, so an undersized
+  // parameter set cannot produce a number.
+  "security": "128_classic"
+}
